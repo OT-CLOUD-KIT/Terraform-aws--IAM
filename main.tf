@@ -157,4 +157,3 @@ locals {
   group_policy_map = { for item in local.group_policy_list : item.key => item }
 }
 
-
