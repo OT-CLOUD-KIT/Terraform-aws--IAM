@@ -1,6 +1,4 @@
-provider "aws" {
-  region = var.aws_region
-}
+
 
 module "iam_setup" {
   source = "../"  
