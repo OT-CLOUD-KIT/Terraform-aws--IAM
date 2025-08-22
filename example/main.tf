@@ -7,4 +7,6 @@ module "iam_setup" {
   groups                 = var.groups
   policies               = var.policies
   use_root_path_template = var.use_root_path_template
+  credentials_path = "${path.root}"
 }
+

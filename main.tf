@@ -40,14 +40,23 @@ resource "aws_iam_user_policy_attachment" "attached" {
   for_each = { for u, data in var.users : u => data if length(data.policies) > 0 }
 
   user       = each.key
-  policy_arn = each.value.policies[0] # For multiple, can use nested for_each
+  policy_arn = each.value.policies[0] 
   depends_on = [aws_iam_user.users]
 }
+
+locals {
+  credentials_path = (
+    var.credentials_path != "" ?
+    var.credentials_path :
+    path.root  
+  )
+}
+
 
 resource "local_file" "credentials" {
   for_each = { for k, v in var.users : k => v if v.create_login_profile || v.create_access_key }
 
-  filename = "${path.module}/credentials-${each.key}.txt"
+  filename = "${local.credentials_path}/credentials-${each.key}.txt"
 
   content = <<EOT
 User Name:          ${each.key}
@@ -103,16 +112,13 @@ resource "aws_iam_policy" "policies" {
   path        = lookup(each.value, "path", "/")
   description = lookup(each.value, "desc", "Managed by Terraform")
 
-  # Use templatefile if provided, otherwise jsonencode policy_statement
-   policy      = var.use_root_path_template ? lookup(each.value, "policy_template_file") == null ? jsonencode(jsondecode(lookup(each.value, "policy_statement"))) : templatefile(lookup(each.value, "policy_template_file"), lookup(each.value, "policy_template_vars")) : lookup(each.value, "policy_template_file") == null ? jsonencode(jsondecode(lookup(each.value, "policy_statement"))) : templatefile("${path.module}/policy_document/${lookup(each.value, "policy_template_file")}", lookup(each.value, "policy_template_vars"))
-
-
-
+   policy      = var.use_root_path_template ? lookup(each.value, "policy_template_file") == null ? jsonencode(jsondecode(lookup(each.value, "policy_statement"))) : templatefile(lookup(each.value, "policy_template_file"), lookup(each.value, "policy_template_vars")) : lookup(each.value, "policy_template_file") == null ? jsonencode(jsondecode(lookup(each.value, "policy_statement"))) : templatefile("${path.root}/policy_document/${lookup(each.value, "policy_template_file")}", lookup(each.value, "policy_template_vars"))
 }
 
 
 resource "aws_iam_user_policy_attachment" "custom_user_attach" {
-  for_each = local.user_policy_map
+  for_each = local.user_policy_map  # Use templatefile if provided, otherwise jsonencode policy_statement
+
 
   user       = each.value.user
   policy_arn = each.value.policy_arn

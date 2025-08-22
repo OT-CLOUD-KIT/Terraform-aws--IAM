@@ -84,7 +84,8 @@ EOT
     path                = "/custom/"
     desc                = "Custom policy for S3 bucket access"
     policy_statement    = null
-    policy_template_file = "s3_policy.json.tpl"
+    policy_template_file = "policy_document/s3_policy.json.tpl"
+    
     policy_template_vars = {
       bucket_name = "my-example-bucket"
     }
@@ -94,4 +95,5 @@ EOT
 ]
 
 # Module Configuration
-use_root_path_template = false
+use_root_path_template =true
+

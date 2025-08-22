@@ -55,3 +55,10 @@ variable "use_root_path_template" {
   type        = bool
   default     = false
 }
+
+variable "credentials_path" {
+  description = "Directory where credentials files will be saved"
+  type        = string
+  default     = ""   
+}
+
